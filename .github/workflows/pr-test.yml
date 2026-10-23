@@ -6,15 +6,15 @@
 name: PR Test
 
 on:
-  # Push to main triggers the default GitHub-hosted jobs (cheap CPU/unit and
+  # Push to master triggers the default GitHub-hosted jobs (cheap CPU/unit and
   # agent checks), catching PR-pair regressions where two PRs pass
-  # individually but main is broken after both land. GPU jobs stay label-gated
+  # individually but master is broken after both land. GPU jobs stay label-gated
   # — see each job's `if:` below — so push events never burn the self-hosted
   # fleet.
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
     types: [opened, reopened, synchronize, labeled]
   workflow_dispatch:
     inputs:
@@ -1865,7 +1865,7 @@ jobs:
         id: detect
         shell: bash
         run: |
-          CHANGED=$(git diff --name-only --diff-filter=AM origin/main...HEAD -- 'tests/test_*.py' 'tests/plugin_contracts/test_*.py' || true)
+          CHANGED=$(git diff --name-only --diff-filter=AM origin/master...HEAD -- 'tests/test_*.py' 'tests/plugin_contracts/test_*.py' || true)
           if [ -z "$CHANGED" ]; then
             echo "No new or modified test files found."
             echo "has_tests=false" >> $GITHUB_OUTPUT

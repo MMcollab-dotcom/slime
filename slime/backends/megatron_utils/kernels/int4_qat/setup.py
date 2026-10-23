@@ -1,7 +1,8 @@
 import os
+
+import torch
 from setuptools import setup
 from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-import torch
 
 # A ROCm PyTorch build makes CUDAExtension hipify the sources and call hipcc,
 # which rejects the nvcc-only flags below. The gfx target is passed through

@@ -47,6 +47,7 @@ dev = [
     "jinja2",
     "pytest",
     "ruff==0.14.7",
+    "pyright>=1.1.414",
 ]
 docs = [
     "gguf>=0.10.0",
@@ -108,6 +109,9 @@ namespaces = false
 [build-system]
 requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
+
+[tool.pyright]
+typeCheckingMode = "standard"
 
 [tool.isort]
 profile = "black"  # black-compatible

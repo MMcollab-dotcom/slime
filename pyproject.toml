@@ -46,6 +46,7 @@ dev = [
     "pre-commit",
     "jinja2",
     "pytest",
+    "ruff==0.14.7",
 ]
 docs = [
     "gguf>=0.10.0",

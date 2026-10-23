@@ -4,6 +4,28 @@
 
 Thank you for your interest in contributing to slime! We deeply appreciate every contribution from the community. To keep the project healthy and sustainable, please read this document carefully before submitting issues or pull requests.
 
+## Local Python environment
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run from the repository root:
+
+```bash
+uv sync --locked --only-group dev --python 3.13
+uv run --locked --only-group dev python .github/workflows/generate_github_workflows.py
+```
+
+Use `uv add` for package dependencies and `uv add --group dev` for development tools.
+Commit both `pyproject.toml` and `uv.lock`. Run `uv lock` after editing dependencies by hand.
+For CPU tests, use `uv sync --locked --only-group cpu`, then `uv pip install --no-deps -e .`
+and run tests with `uv run --no-sync python -m pytest`. See [documentation setup](docs/README.md)
+for documentation builds and browser checks.
+
+`uv sync --locked` installs the package's runtime dependencies and development tools.
+On Linux, uv uses CPU PyTorch wheels for local development.
+The Sunabako sandbox dependency is installed only on Linux.
+GPU training also needs the platform-specific stack described in the quick start.
+Inside the supplied VM/container environments, keep using `pip install -e . --no-deps`
+to preserve their preinstalled GPU packages.
+
 ## Collaboration Scope
 
 slime is the RL training infrastructure behind [GLM-4.5 through GLM-5.3](https://z.ai/blog/glm-5.3), [GLM-5.3-Flash](https://z.ai/blog/glm-5.3-flash), and a large number of internal experiments at Z.ai. We open-sourced slime because we believe the training scenarios used internally cover the majority of cutting-edge RL algorithm requirements, and we hope to provide the community with a correct and efficient large-scale RL training infrastructure.

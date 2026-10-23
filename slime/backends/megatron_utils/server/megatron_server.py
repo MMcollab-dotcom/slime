@@ -14,7 +14,7 @@ from aiohttp import web
 
 def _find_project_root() -> Path:
     for parent in Path(__file__).resolve().parents:
-        if (parent / "slime").is_dir() and (parent / "setup.py").is_file():
+        if (parent / "slime").is_dir() and (parent / "pyproject.toml").is_file():
             return parent
     return Path(__file__).resolve().parents[4]
 

@@ -199,11 +199,12 @@ cd "$BASE_DIR/Megatron-LM" && git checkout ${MEGATRON_COMMIT} && pip install -e 
 
 cd "$SLIME_DIR"
 # Install slime's pure-python runtime deps first (wandb, ray, accelerate,
-# transformers, etc.) from its requirements.txt, then install slime itself
+# transformers, etc.) from pyproject.toml, then install slime itself
 # with --no-deps so pip doesn't re-resolve and stomp our pinned native libs
 # (torch+cu130, sglang-kernel, ...). The Dockerfile does the same thing
 # before the editable package installation.
-pip install -r requirements.txt "sglang==${SGLANG_VERSION#v}"
+python -c 'import tomllib; print("\n".join(tomllib.load(open("pyproject.toml", "rb"))["project"]["dependencies"]))' > "$BASE_DIR/slime-requirements.txt"
+pip install -r "$BASE_DIR/slime-requirements.txt" "sglang==${SGLANG_VERSION#v}"
 pip install -e . --no-deps
 
 # int4_qat kernel (matches Dockerfile)

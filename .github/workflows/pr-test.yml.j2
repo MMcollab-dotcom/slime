@@ -88,7 +88,6 @@
       'label': 'run-ci-cpu-unittest',
       'always': True,
       'cpu': True,
-      'extra_pip_deps': 'transformers wandb zstandard',
       'tests': [
         {'test_file': 'test_megatron_argument_validation.py', 'num_gpus': 0, 'straw': True},
         {'test_file': 'test_megatron_tokenizer_init.py', 'num_gpus': 0},
@@ -183,7 +182,6 @@
     'agent-test': {
       'always': True,
       'cpu': True,
-      'extra_pip_deps': 'transformers tokenizers wandb',
       'tests': [
         {'test_file': 'test_agent/test_trajectory_manager_branching.py', 'num_gpus': 0},
         {'test_file': 'test_agent/test_token_contract.py', 'num_gpus': 0},
@@ -211,15 +209,15 @@
 name: PR Test
 
 on:
-  # Push to main triggers the default GitHub-hosted jobs (cheap CPU/unit and
+  # Push to master triggers the default GitHub-hosted jobs (cheap CPU/unit and
   # agent checks), catching PR-pair regressions where two PRs pass
-  # individually but main is broken after both land. GPU jobs stay label-gated
+  # individually but master is broken after both land. GPU jobs stay label-gated
   # — see each job's `if:` below — so push events never burn the self-hosted
   # fleet.
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
-    branches: [main]
+    branches: [master]
     types: [opened, reopened, synchronize, labeled]
   workflow_dispatch:
     inputs:
@@ -250,6 +248,9 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.12"
       - name: Generator contracts and exported shell execution
         if: matrix.suite == 'generator'
         run: node --test docs/tests/experiment.test.cjs
@@ -258,8 +259,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc fonts-noto-cjk
-          pip install -r docs/requirements.txt -r docs/tests/requirements.txt
-          python -m playwright install --with-deps chromium
+          uv sync --locked --only-group docs-test
+          uv run --locked --only-group docs-test python -m playwright install --with-deps chromium
       - name: Strict bilingual build and browser walkthrough
         if: matrix.suite == 'browser'
         env:
@@ -267,7 +268,7 @@ jobs:
         run: |
           bash docs/build.sh en -W --keep-going
           bash docs/build.sh zh -W --keep-going
-          python docs/tests/test_browser.py
+          uv run --locked --only-group docs-test python docs/tests/test_browser.py
 
 <% for job_name, config in jobs.items() %>
   << job_name >>:
@@ -311,27 +312,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-          cache: 'pip'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.12"
 
       - name: Install dependencies
         shell: bash
         run: |
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install pytest numpy packaging pyyaml omegaconf tqdm httpx requests ray pybase64 pylatexenc sympy aiohttp pillow safetensors psutil
-<% if config.get('extra_pip_deps') %>
-          pip install << config.extra_pip_deps >>
-<% endif %>
-
-<% if job_name == 'cpu-unittest' %>
-      - name: Install straw for queue tests
-        if: matrix.info.straw == true
-        shell: bash
-        run: python -m pip install --upgrade --no-deps --only-binary=straw-queue "straw-queue>=0.1.3"
-<% endif %>
-
-      - name: Install
-        shell: bash
-        run: cd $GITHUB_WORKSPACE && pip install -e . --no-deps
+          uv sync --locked --only-group cpu --python 3.10
+          uv pip install --no-deps -e .
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
 <% else %>
 <% endif %>
 
@@ -462,7 +452,7 @@ jobs:
         id: detect
         shell: bash
         run: |
-          CHANGED=$(git diff --name-only --diff-filter=AM origin/main...HEAD -- 'tests/test_*.py' 'tests/plugin_contracts/test_*.py' || true)
+          CHANGED=$(git diff --name-only --diff-filter=AM origin/master...HEAD -- 'tests/test_*.py' 'tests/plugin_contracts/test_*.py' || true)
           if [ -z "$CHANGED" ]; then
             echo "No new or modified test files found."
             echo "has_tests=false" >> $GITHUB_OUTPUT

@@ -11,11 +11,10 @@ Run from the repository root:
 ```bash
 sudo apt-get update
 sudo apt-get install -y pandoc
-python3 -m venv .venv-docs
-.venv-docs/bin/python -m pip install -r docs/requirements.txt
+uv sync --locked --only-group docs --python 3.13
 ```
 
-The build scripts use `sphinx-build` from your current environment, or fall back to the repository's `.venv-docs`. You do not need to activate that environment to build. If neither is available, the script prints the setup commands above. To run the Python/browser checks below in this environment, first run `source .venv-docs/bin/activate`.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) first. The build scripts run Sphinx through uv using the locked documentation dependencies.
 
 ## Build and Preview
 
@@ -66,11 +65,10 @@ node --test docs/tests/experiment.test.cjs
 Browser tests check both languages, reversible choices, straw/partial scheduling, choice-specific diagrams, in-page derivations, exports, categorized navigation and mobile widths. They also build the actual root/zh production layout and check assets and language links at `https://thudm.github.io/slime/`. They start their own local server and need Chromium:
 
 ```bash
-pip install -r docs/tests/requirements.txt
-python -m playwright install chromium
+uv run --locked --only-group docs-test python -m playwright install chromium
 SLIME_DOC_LAYOUT=prefix bash docs/build.sh en -W --keep-going
 SLIME_DOC_LAYOUT=prefix bash docs/build.sh zh -W --keep-going
-python docs/tests/test_browser.py
+uv run --locked --only-group docs-test python docs/tests/test_browser.py
 ```
 
 Both suites are registered in the `docs-lab` matrix in `.github/workflows/pr-test.yml.j2`; regenerate `.github/workflows/pr-test.yml` when changing that job. Publishing also checks the generator and builds both languages strictly. These checks do not execute GPU training or certify memory capacity.
@@ -83,6 +81,6 @@ Both suites are registered in the `docs-lab` matrix in `.github/workflows/pr-tes
 
 在仓库根目录安装依赖后，运行 `bash docs/build_all.sh` 和 `bash docs/serve.sh all`，即可在 `http://localhost:8000` 预览两种语言。单独构建中文可使用 `bash docs/build.sh zh`；严格检查可追加 `-W --keep-going`。
 
-推荐按上方命令将文档依赖安装到 `.venv-docs`。构建脚本优先使用当前环境的 `sphinx-build`，找不到时自动使用仓库中的 `.venv-docs`，无需手动激活；尚未安装时会给出具体安装命令。运行 Python / 浏览器检查前，使用 `source .venv-docs/bin/activate` 激活该环境。
+请先安装 uv，再按上方命令同步文档依赖。构建脚本通过 uv 运行 Sphinx，使用锁定的依赖版本，无需手动激活虚拟环境。
 
 首页由 `_templates/experiment.html` 渲染，配置生成与交互分别位于 `experiment-engine.js` 和 `experiment-ui.js`。运行上面的 Node 与浏览器检查，可覆盖配置依赖、撤销/重做、脚本下载、straw/partial、双语链接和手机配图面板，并按实际发布目录验证 `/slime/` 根路径；不涉及 GPU 训练实测。

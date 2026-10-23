@@ -260,9 +260,10 @@ def execute(*, model_path=None, prompt_data=None, work_dir=None, num_gpus_per_no
                     legacy / "rollout/global_dataset_state_dict_1.pt", weights_only=False
                 )
             else:
-                with RolloutArchive(outputs / "parent/debug_2.straw.json") as old, RolloutArchive(
-                    output / "debug_0.straw.json"
-                ) as new:
+                with (
+                    RolloutArchive(outputs / "parent/debug_2.straw.json") as old,
+                    RolloutArchive(output / "debug_0.straw.json") as new,
+                ):
                     assert sample_values(old.load_samples()) == sample_values(new.load_samples())
             print(f"{name}: steps {steps}, gradient norms {norms}, archive checks passed", flush=True)
 

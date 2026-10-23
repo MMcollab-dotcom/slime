@@ -252,7 +252,7 @@ if __name__ == "__main__":
 Do not edit the generated `.github/workflows/pr-test.yml` directly. After editing `.github/workflows/pr-test.yml.j2`, run:
 
 ```bash
-python .github/workflows/generate_github_workflows.py
+uv run --locked --only-group dev python .github/workflows/generate_github_workflows.py
 ```
 
 Commit both the template and the generated workflow file.

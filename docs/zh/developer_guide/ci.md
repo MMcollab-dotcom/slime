@@ -238,7 +238,7 @@ if __name__ == "__main__":
 不要直接编辑生成的 `.github/workflows/pr-test.yml`。修改 `.github/workflows/pr-test.yml.j2` 后，运行：
 
 ```bash
-python .github/workflows/generate_github_workflows.py
+uv run --locked --only-group dev python .github/workflows/generate_github_workflows.py
 ```
 
 提交时要同时包含模板和生成后的工作流文件。

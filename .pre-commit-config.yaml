@@ -14,6 +14,7 @@ repos:
       - id: check-case-conflict
       - id: detect-private-key
       - id: check-added-large-files
+        exclude: ^uv\.lock$
         args: ['--maxkb=1000']
       - id: requirements-txt-fixer
 

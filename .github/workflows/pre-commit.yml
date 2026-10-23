@@ -23,10 +23,17 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.10'
-          cache: 'pip'
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.12"
+
+      - name: Validate lockfile and build package
+        run: |
+          uv lock --check
+          uv build
 
       - name: Install pre-commit
-        run: pip install --upgrade pip pre-commit
+        run: uv sync --locked --only-group dev
 
       - name: Cache pre-commit environments
         uses: actions/cache@v5
@@ -37,5 +44,5 @@ jobs:
             pre-commit-${{ runner.os }}-
 
       - name: Run pre-commit on all files
-        run: pre-commit run --all-files --show-diff-on-failure --color=always
+        run: uv run --locked --only-group dev pre-commit run --all-files --show-diff-on-failure --color=always
 

@@ -79,7 +79,8 @@ RUN git clone https://github.com/zhuzilin/DeepGEMM.git --recursive && \
 
 RUN pip install "nvidia-modelopt[torch]>=0.37.0" --no-build-isolation
 
-COPY requirements.txt /tmp/requirements.txt
+COPY pyproject.toml /tmp/pyproject.toml
+RUN python -c 'import tomllib; print("\n".join(tomllib.load(open("/tmp/pyproject.toml", "rb"))["project"]["dependencies"]))' > /tmp/requirements.txt
 RUN pip install --ignore-installed PyJWT && \
     pip install -r /tmp/requirements.txt "sglang==$(python -c 'import importlib.metadata as m; print(m.version("sglang"))')"
 
